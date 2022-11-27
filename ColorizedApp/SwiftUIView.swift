@@ -2,20 +2,27 @@
 //  SwiftUIView.swift
 //  ColorizedApp
 //
-//  Created by albik on 26.11.2022.
+//  Created by albik on 25.11.2022.
 //
 
 import SwiftUI
 
-struct ContentView: View {
+struct SwiftUIView: View {
+
+    private enum textField {
+        case red
+        case green
+        case blue
+    }
     
     @State private var redSlider = Double.random(in: 1...255).rounded()
     @State private var greenSlider = Double.random(in: 1...255).rounded()
     @State private var blueSlider = Double.random(in: 1...255).rounded()
     
-    @State var showAlert = false
+    @State private var showAlert = false
     
-    @FocusState var isInputActive: Bool
+    @FocusState private var isInputActive: Bool
+    @FocusState private var focusedField: textField?
     
     var body: some View {
         ZStack {
@@ -29,9 +36,12 @@ struct ContentView: View {
                         blue: blueSlider / 255))
                     .padding(.bottom, 32.0)
                 VStack{
-                    ColorSeter(colorValue: $redSlider, color: .red)
-                    ColorSeter(colorValue: $greenSlider, color: .green)
-                    ColorSeter(colorValue: $blueSlider, color: .blue)
+                    ColorSeting(colorValue: $redSlider, color: .red)
+                        .focused($focusedField, equals: .red)
+                    ColorSeting(colorValue: $greenSlider, color: .green)
+                        .focused($focusedField, equals: .green)
+                    ColorSeting(colorValue: $blueSlider, color: .blue)
+                        .focused($focusedField, equals: .blue)
                         .alert("Incorrect Format", isPresented: $showAlert, actions: {}) {
                             Text("Please enter number from 0 to 255")
                         }
@@ -39,6 +49,9 @@ struct ContentView: View {
                 .focused($isInputActive)
                 .toolbar {
                     ToolbarItemGroup(placement: .keyboard) {
+                        Button(action: nextField) {
+                            Image(systemName: "arrow.up.arrow.down")
+                        }
                         Spacer()
                         Button("Done") {
                             isInputActive = false
@@ -51,19 +64,32 @@ struct ContentView: View {
             isInputActive = false
         }
     }
-}
-
-struct TestSwiftUIViewPreviews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+    private func nextField() {
+        if focusedField == .none {
+            focusedField = .red
+        } else if focusedField == .red {
+            focusedField = .green
+        } else if focusedField == .green {
+            focusedField = .blue
+        } else if focusedField == .blue {
+            focusedField = .red
+        }
     }
 }
 
-struct ColorSeter: View {
+
+struct SwiftUIViewPreviews: PreviewProvider {
+    static var previews: some View {
+        SwiftUIView()
+    }
+}
+
+struct ColorSeting: View {
     
     @Binding var colorValue: Double
     @State var showAlert = false
-    @FocusState var focusState: Bool
+    @FocusState private var focusState: Bool
+    
     let color: Color
     
     let formatter: NumberFormatter = {
